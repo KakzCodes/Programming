@@ -16,11 +16,27 @@ the function read_root() will be executed, and its return value will be sent bac
 In this case, it returns a JSON object with a message "Hello World!".
 """
 
-# name of library: FastAPI
-from fastapi import Body, FastAPI
+# name of libraries: FastAPI
+from fastapi import FastAPI
+from fastapi.params import Body
+from pydantic import BaseModel
+from typing import Optional
+
 
 #instance of FastAPI class
 app = FastAPI()
+
+# post class that extends basemodel
+class Post(BaseModel):
+
+    # checks if title and content are both strings
+    # defining the schema on what frontend data should be sent to us
+    title: str
+    content: str
+    published: bool = True # default value is True
+    rating: Optional[int] = None # optional means it can be None, if not sent, default is None
+
+my_posts = []
 
 # path operations #
 # The `async` keyword means the method can pause while waiting for something else
@@ -41,8 +57,10 @@ def get_posts():
 # (fastapi method) Body = (...) tells FastAPI the body is required, if no JSON data is sent validation error occurs
 # prints received data to terminal where app is running
 # return sends JSON back to client
-@app.post("/createposts")
-def create_posts(payload: dict = Body(...)): # 3 dots means it is required if not, it would be 'None' instead
-    print(payload)
-    return {"new_post": f"title: {payload['title']}, content: {payload['content']}"}
+@app.post("/posts")
+def create_posts(post: Post): # 3 dots means it is required if not, it would be 'None' instead
+    print(post)
+    print(post.model_dump()) # prints the data in dictionary format
+    return {"data": post}
+# title str, content str, published bool, rating int
 
